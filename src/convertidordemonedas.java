@@ -12,32 +12,54 @@ public class convertidordemonedas {
         CurrencyConverter converter = new CurrencyConverter("a5e12c009c8f525d847c0b5f");
         Scanner scanner = new Scanner(System.in);
 
-        while (true) {
+        String choice;
+        do {
             displayMenu();
-            String choice = scanner.nextLine();
+            choice = scanner.nextLine();
 
             if (choice.equals("1")) {
                 displayCurrencyOptions(converter.getSupportedCurrencies());
-                System.out.print("Selecciona la moneda de origen: ");
-                int fromCurrencyIndex = Integer.parseInt(scanner.nextLine()) - 1;
-                System.out.print("Selecciona la moneda de destino: ");
-                int toCurrencyIndex = Integer.parseInt(scanner.nextLine()) - 1;
-                System.out.print("Ingresa la cantidad a convertir: ");
-                double amount = Double.parseDouble(scanner.nextLine());
+                String fromCurrency;
+                do {
+                    System.out.print("Selecciona la moneda de origen: ");
+                    int fromCurrencyIndex = Integer.parseInt(scanner.nextLine()) - 1;
+                    fromCurrency = getCurrencyCode(converter, fromCurrencyIndex);
+                    if (fromCurrency == null) {
+                        System.out.println("Moneda de origen no válida. Por favor, selecciona una moneda válida.");
+                    }
+                } while (fromCurrency == null);
 
-                String fromCurrency = converter.getSupportedCurrencies().keySet().toArray()[fromCurrencyIndex].toString();
-                String toCurrency = converter.getSupportedCurrencies().keySet().toArray()[toCurrencyIndex].toString();
+                String toCurrency;
+                do {
+                    System.out.print("Selecciona la moneda de destino: ");
+                    int toCurrencyIndex = Integer.parseInt(scanner.nextLine()) - 1;
+                    toCurrency = getCurrencyCode(converter, toCurrencyIndex);
+                    if (toCurrency == null) {
+                        System.out.println("Moneda de destino no válida. Por favor, selecciona una moneda válida.");
+                    }
+                } while (toCurrency == null);
+
+                double amount;
+                do {
+                    System.out.print("Ingresa la cantidad a convertir (solo digitos): ");
+                    String amountStr = scanner.nextLine();
+                    if (amountStr.matches("\\d+")) {
+                        amount = Double.parseDouble(amountStr);
+                    } else {
+                        amount = -1; // Valor inválido para continuar el bucle
+                        System.out.println("Cantidad no válida. Por favor, ingresa solo dígitos.");
+                    }
+                } while (amount == -1);
 
                 double convertedAmount = converter.convert(amount, fromCurrency, toCurrency);
                 System.out.println(amount + " " + converter.getSupportedCurrencies().get(fromCurrency) + " (" + fromCurrency + ")" +
                         " equivale a " + convertedAmount + " " + converter.getSupportedCurrencies().get(toCurrency) + " (" + toCurrency + ")");
             } else if (choice.equals("2")) {
                 System.out.println("Gracias por usar el conversor de monedas. ¡Hasta luego!");
-                break;
             } else {
                 System.out.println("Opción no válida. Por favor, selecciona una opción válida.");
             }
-        }
+        } while (!choice.equals("2"));
     }
 
     public static void displayMenu() {
@@ -55,6 +77,14 @@ public class convertidordemonedas {
             index++;
         }
         System.out.println();
+    }
+
+    public static String getCurrencyCode(CurrencyConverter converter, int currencyIndex) {
+        try {
+            return (String) converter.getSupportedCurrencies().keySet().toArray()[currencyIndex];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
     }
 }
 
